@@ -90,7 +90,8 @@ screenshot1 - <img width="1917" height="1026" alt="Screenshot 2026-09-04 063750"
 
 ### Diagrams
 
-![Workflow]![Uploading wrkflw.png…]()
+![Workflow]!<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/892faaa2-9b81-4573-bf62-00f69f841be5" />
+
 
 
 *Workflow showing how mouse movement is captured, analyzed, converted into a stress index, and used to control the interface, logs, waveform, and audio.*
