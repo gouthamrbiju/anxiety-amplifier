@@ -1,102 +1,148 @@
-<img width="1280" height="640" alt="git (1)" src="https://github.com/user-attachments/assets/8920b256-2ba8-4988-b824-5351134eb4bd" />
-
-
-
-# [Project Name] 🎯
-
+# M.A.M. — Mouse Anxiety Monitor 🖱️💀
 
 ## Basic Details
-### Team Name: [Name]
 
+### Team Name: Cursor Crisis
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+
+* Member 1: [Sarath Jayakumar] - [College of Engineering Kallooppara]
+* Member 2: [Goutham R B] - [College of Engineering Kallooppara]
 
 ### Project Description
-[2-3 lines about what your project does]
+
+M.A.M. (Mouse Anxiety Monitor) is a completely unnecessary "medical" monitoring system that analyzes your mouse movements and generates a fake stress level in real time.
+
+It measures cursor speed, directional changes, and movement jitter to determine whether the user is calm, mildly stressed, or experiencing a full-blown digital meltdown.
 
 ### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
+
+People have no idea how emotionally unstable their mouse cursor is.
+
+Traditional stress monitors are boring, require actual sensors, and might even involve science. M.A.M. solves the completely imaginary problem of not knowing whether your mouse is having a mental breakdown.
 
 ### The Solution (that nobody asked for)
-[How are you solving it? Keep it fun!]
 
-## Technical Details
-### Technologies/Components Used
-For Software:
-- [Languages used]
-- [Frameworks used]
-- [Libraries used]
-- [Tools used]
+M.A.M. tracks your cursor movement and converts chaotic mouse movements into a completely fake "Stress Index."
 
-For Hardware:
-- [List main components]
-- [List specifications]
-- [List tools required]
+The more violently you move your mouse, the higher the stress level becomes. The system responds with increasingly dramatic visuals, warning messages, screen shaking, flashing effects, and increasingly stressful sounds.
 
-### Implementation
-For Software:
-# Installation
-[commands]
-
-# Run
-[commands]
-
-### Project Documentation
-For Software:
-
-# Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
-
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
-
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
-
-# Diagrams
-![Workflow](Add your workflow/architecture diagram here)
-*Add caption explaining your workflow*
-
-For Hardware:
-
-# Schematic & Circuit
-![Circuit](Add your circuit diagram here)
-*Add caption explaining connections*
-
-![Schematic](Add your schematic diagram here)
-*Add caption explaining the schematic*
-
-# Build Photos
-![Components](Add photo of your components here)
-*List out all components shown*
-
-![Build](Add photos of build process here)
-*Explain the build steps*
-
-![Final](Add photo of final product here)
-*Explain the final build*
-
-### Project Demo
-# Video
-[Add your demo video link here]
-*Explain what the video demonstrates*
-
-# Additional Demos
-[Add any extra demo materials/links]
-
-## Team Contributions
-- [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
+No medical accuracy. Maximum confidence.
 
 ---
-Made with ❤️ at TinkerHub Useless Projects 
 
-![Static Badge](https://img.shields.io/badge/TinkerHub-24?color=%23000000&link=https%3A%2F%2Fwww.tinkerhub.org%2F)
-![Static Badge](https://img.shields.io/badge/UselessProjects--26-26?link=https%3A%2F%2Ftinkerhub.org%2Fevents%2F1M8ORET9A1%2Fuseless-projects-3.0)
+## Technical Details
+
+### Technologies/Components Used
+
+#### For Software:
+
+* **Languages used:** HTML5, CSS3, JavaScript
+* **Frameworks used:** None — Vanilla JavaScript
+* **Libraries used:** Tone.js
+* **Tools used:** VS Code, Google Chrome, HTML5 Canvas API, Browser Mouse Events API
+
+#### For Hardware:
+
+* No additional hardware required
+* Standard computer/laptop
+* Mouse or touchpad
+
+### Implementation
+
+#### For Software:
+
+# Installation
+
+No installation or dependencies are required.
+
+1. Download or clone the project.
+2. Open the `.html` file in a modern web browser.
+3. Click **BEGIN MONITORING**.
+4. Move your mouse and watch your "stress level" rise.
+
+# Run
+
+Simply open the HTML file/URL in **Google Chrome, Microsoft Edge, or another modern browser**.
+
+---
+
+## Project Documentation
+
+### Screenshots
+screenshot1 - <img width="1917" height="1026" alt="Screenshot 2026-09-04 063750" src="https://github.com/user-attachments/assets/d8067d13-c164-4566-b558-0e34c9e20155" />
 
 
+
+*The M.A.M. startup screen displaying the fictional medical monitoring interface.*
+
+![Screenshot2]<img width="1917" height="1026" alt="Screenshot 2026-09-04 063750" src="https://github.com/user-attachments/assets/823e77ca-da15-4ae6-84bf-469a5a02bdef" />
+
+
+*The monitoring dashboard showing stress index, cursor velocity, jitter index, and patient status.*
+
+![Screenshot3]<img width="1917" height="1031" alt="Screenshot 2026-09-04 063953" src="https://github.com/user-attachments/assets/d23b2c5a-260c-4441-866e-e1374bf8ea3d" />
+
+
+
+*The system reacting to rapid mouse movement with increased stress levels, warnings, and visual/audio effects.*
+
+### Diagrams
+
+![Workflow]![Uploading wrkflw.png…]()
+
+
+*Workflow showing how mouse movement is captured, analyzed, converted into a stress index, and used to control the interface, logs, waveform, and audio.*
+
+**Workflow:**
+
+```text
+Mouse Movement
+      ↓
+Capture Cursor Position & Time
+      ↓
+Calculate Speed
+      ↓
+Calculate Direction Reversals
+      ↓
+Calculate Speed Jerk
+      ↓
+Calculate Jitter Index
+      ↓
+Generate Stress Level (0–100%)
+      ↓
+Determine Stress Tier
+      ↓
+┌──────────────┬──────────────┬──────────────┐
+│ Visual UI    │ Diagnostic   │ Audio Effects │
+│ & Waveform   │ Messages     │              │
+└──────────────┴──────────────┴──────────────┘
+```
+
+---
+
+## Project Demo
+
+### Video
+
+https://youtu.be/zu7IJlGjSbo
+
+*The video demonstrates the M.A.M. system tracking mouse movement, calculating the fictional stress index, changing status levels, displaying diagnostic messages, generating waveform animations, and producing dynamic audio effects.*
+
+### Additional Demos
+
+* Live browser demonstration
+* Source code available in this repository
+* Interactive mouse-stress visualization
+
+---
+
+## Team Contributions
+
+* **Goutham R B:** Project concept, UI design, JavaScript logic, integration.
+* **Sarath Jayakumar:** mouse movement tracking, stress calculation, animations,
+
+
+---
+
+Made with ❤️ at TinkerHub Useless Projects
