@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>M.A.M. — Mouse Anxiety Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<style>
+  :root{
+    --bg:#0B1220;
+    --panel:#0F1A2E;
+    --line:#1E2C46;
+    --teal:#5EEAD4;
+    --muted:#7C8AA5;
+    --text:#DCE6F5;
+    --amber:#F59E0B;
+    --red:#E11D48;
+    --flash:#0B1220;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    overflow:hidden;
+  }
+  #screen{
+    position:relative;
+    height:100vh;
+    width:100vw;
+    display:flex;
+    flex-direction:column;
+    padding:28px 32px 18px;
+    transition:background-color 0.4s ease;
+  }
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    border-bottom:1px solid var(--line);
+    padding-bottom:16px;
+  }
+  .brand{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    letter-spacing:0.08em;
+    color:var(--muted);
+  }
+  .brand b{ color:var(--text); font-weight:600; }
+  .patient{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--muted);
+    text-align:right;
+    line-height:1.6;
+  }
+  .vitals-row{
+    display:flex;
+    gap:48px;
+    margin-top:22px;
+    align-items:baseline;
+  }
+  .stress-block{
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .stress-label{
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .stress-value{
+    font-size:64px;
+    font-weight:700;
+    color:var(--teal);
+    line-height:1;
+    transition:color 0.3s ease;
+    font-variant-numeric:tabular-nums;
+  }
+  .stress-value span{ font-size:26px; font-weight:500; opacity:0.6; }
+  .sub-vital{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .sub-vital .n{
+    color:var(--text);
+    font-size:20px;
+    font-weight:600;
+  }
+  .status-tag{
+    margin-left:auto;
+    align-self:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:0.06em;
+    padding:8px 16px;
+    border:1px solid var(--teal);
+    color:var(--teal);
+    border-radius:2px;
+    transition:all 0.3s ease;
+  }
+  canvas#wave{
+    width:100%;
+    flex:1;
+    margin-top:20px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:var(--panel);
+  }
+  #log{
+    height:150px;
+    margin-top:16px;
+    overflow-y:auto;
+    border-top:1px solid var(--line);
+    padding-top:10px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    color:var(--muted);
+    display:flex;
+    flex-direction:column-reverse;
+  }
+  #log div{ padding:2px 0; }
+  #log .t-warn{ color:var(--amber); }
+  #log .t-crit{ color:var(--red); font-weight:600; }
+  #log .t-calm{ color:var(--teal); }
+
+  #overlay{
+    position:fixed; inset:0;
+    background:rgba(4,8,16,0.92);
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column;
+    text-align:center;
+    z-index:50;
+    padding:24px;
+  }
+  #overlay h1{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:22px;
+    letter-spacing:0.04em;
+    margin-bottom:10px;
+    color:var(--teal);
+  }
+  #overlay p{
+    max-width:440px;
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.6;
+    margin-bottom:26px;
+  }
+  #startBtn{
+    font-family:'IBM Plex Mono',monospace;
+    background:transparent;
+    border:1px solid var(--teal);
+    color:var(--teal);
+    padding:14px 28px;
+    font-size:14px;
+    letter-spacing:0.06em;
+    cursor:pointer;
+    border-radius:2px;
+    transition:all 0.2s ease;
+  }
+  #startBtn:hover{ background:var(--teal); color:#04121C; }
+
+  #flash{
+    position:fixed; inset:0;
+    background:var(--red);
+    opacity:0;
+    pointer-events:none;
+    z-index:40;
+    mix-blend-mode:screen;
+  }
+
+  @keyframes shake{
+    0%,100%{ transform:translate(0,0); }
+    20%{ transform:translate(-6px,4px); }
+    40%{ transform:translate(6px,-4px); }
+    60%{ transform:translate(-4px,-6px); }
+    80%{ transform:translate(4px,6px); }
+  }
+  .shaking{ animation:shake 0.18s infinite; }
+</style>
+</head>
+<body>
+
+<div id="overlay">
+  <h1>MOUSE ANXIETY MONITOR — v1.0</h1>
+  <p>
+    This device reads your cursor's vital signs and reports on your emotional
+    state with complete clinical confidence and zero medical training.
+    Move smoothly and the monitor will relax. Move like you're being chased
+    and so will it.
+  </p>
+  <button id="startBtn">BEGIN MONITORING</button>
+</div>
+
+<div id="flash"></div>
+
+<div id="screen">
+  <div class="topbar">
+    <div class="brand"><b>M.A.M.</b> // mouse anxiety monitor // rev. 1.0</div>
+    <div class="patient">
+      PATIENT: UNIDENTIFIED USER<br>
+      SESSION: <span id="sessionTime">00:00</span>
+    </div>
+  </div>
+
+  <div class="vitals-row">
+    <div class="stress-block">
+      <div class="stress-label">STRESS INDEX</div>
+      <div class="stress-value" id="stressValue">0<span>%</span></div>
+    </div>
+    <div class="sub-vital">
+      CURSOR VELOCITY<br><span class="n" id="velVal">0</span> px/s
+    </div>
+    <div class="sub-vital">
+      JITTER INDEX<br><span class="n" id="jitterVal">0.00</span>
+    </div>
+    <div class="status-tag" id="statusTag">NOMINAL</div>
+  </div>
+
+  <canvas id="wave"></canvas>
+
+  <div id="log"></div>
+</div>
+
+<script>
+// ---------- audio setup ----------
+let audioReady = false;
+let pad, heartbeat, stab, siren, lofi, noise;
+
+function setupAudio(){
+  Tone.Transport.bpm.value = 62;
+
+  pad = new Tone.PolySynth(Tone.Synth, {
+    oscillator:{ type:'sine' },
+    envelope:{ attack:2, decay:1, sustain:0.6, release:3 }
+  }).toDestination();
+  pad.volume.value = -18;
+
+  heartbeat = new Tone.MembraneSynth({
+    pitchDecay:0.05, octaves:4,
+    envelope:{ attack:0.001, decay:0.4, sustain:0.01, release:0.4 }
+  }).toDestination();
+  heartbeat.volume.value = -10;
+
+  stab = new Tone.PolySynth(Tone.Synth, {
+    oscillator:{ type:'sawtooth' },
+    envelope:{ attack:0.005, decay:0.3, sustain:0, release:0.2 }
+  }).toDestination();
+  stab.volume.value = -8;
+
+  siren = new Tone.Synth({
+    oscillator:{ type:'sawtooth' },
+    envelope:{ attack:0.05, decay:0.1, sustain:0.8, release:0.3 }
+  }).toDestination();
+  siren.volume.value = -14;
+
+  noise = new Tone.NoiseSynth({
+    noise:{ type:'white' },
+    envelope:{ attack:0.01, decay:0.2, sustain:0, release:0.1 }
+  }).toDestination();
+  noise.volume.value = -22;
+
+  lofi = new Tone.PluckSynth({ attackNoise:0.5, dampening:3500, resonance:0.85 }).toDestination();
+  lofi.volume.value = -16;
+
+  // calm pad loop
+  new Tone.Loop(time => {
+    if(stressLevel < 22){
+      const chord = ['C3','E3','G3','B3'][Math.floor(Math.random()*4)];
+      pad.triggerAttackRelease(chord, '2n', time);
+    }
+  }, '4n').start(0);
+
+  // calm reward lofi arpeggio (only when very calm)
+  const arp = ['C4','E4','G4','B4','G4','E4'];
+  let arpIdx = 0;
+  new Tone.Loop(time => {
+    if(stressLevel < 12){
+      lofi.triggerAttack(arp[arpIdx % arp.length], time);
+      arpIdx++;
+    }
+  }, '8n').start(0);
+
+  // heartbeat that speeds up with stress
+  new Tone.Loop(time => {
+    if(stressLevel >= 22 && stressLevel < 70){
+      heartbeat.triggerAttackRelease('C1', '8n', time);
+    }
+  }, '4n').start(0);
+
+  Tone.Transport.start();
+}
+
+function stressAudioTick(){
+  if(!audioReady) return;
+  // dynamic tempo: faster heartbeat as stress rises
+  Tone.Transport.bpm.rampTo(60 + stressLevel * 1.6, 0.5);
+
+  if(stressLevel >= 70 && stressLevel < 90 && Math.random() < 0.08){
+    stab.triggerAttackRelease(['D#3','A3','C4'], '16n');
+    noise.triggerAttackRelease('16n');
+  }
+  if(stressLevel >= 90 && Math.random() < 0.18){
+    const freq = 300 + Math.random()*500;
+    siren.frequency.rampTo(freq, 0.08);
+    siren.triggerAttackRelease('16n');
+    noise.triggerAttackRelease('8n');
+  }
+}
+
+// ---------- mouse tracking ----------
+let points = []; // {x,y,t}
+let stressLevel = 0;
+let displayStress = 0;
+let lastMove = performance.now();
+
+window.addEventListener('mousemove', e=>{
+  const now = performance.now();
+  points.push({x:e.clientX, y:e.clientY, t:now});
+  lastMove = now;
+  if(points.length > 40) points.shift();
+});
+
+function computeMetrics(){
+  const now = performance.now();
+  const recent = points.filter(p => now - p.t < 700);
+  if(recent.length < 4){
+    return { speed:0, jitter:0 };
+  }
+
+  const speeds = [];
+  const dxSigns = [];
+  const dySigns = [];
+  for(let i=1;i<recent.length;i++){
+    const a = recent[i-1], b = recent[i];
+    const dt = Math.max(b.t-a.t, 1);
+    const dx = b.x-a.x, dy = b.y-a.y;
+    const dist = Math.hypot(dx,dy);
+    speeds.push(dist/dt*1000); // px/s
+    // ignore near-zero movement to avoid noisy sign flips
+    dxSigns.push(Math.abs(dx) > 1.5 ? Math.sign(dx) : 0);
+    dySigns.push(Math.abs(dy) > 1.5 ? Math.sign(dy) : 0);
+  }
+
+  // 1) reversal rate: how often the cursor flips direction on x or y — the real
+  //    signature of frantic back-and-forth "panic" motion.
+  let reversals = 0, comparable = 0;
+  for(let i=1;i<dxSigns.length;i++){
+    if(dxSigns[i]!==0 && dxSigns[i-1]!==0){
+      comparable++;
+      if(dxSigns[i] !== dxSigns[i-1]) reversals++;
+    }
+    if(dySigns[i]!==0 && dySigns[i-1]!==0){
+      comparable++;
+      if(dySigns[i] !== dySigns[i-1]) reversals++;
+    }
+  }
+  const reversalRate = comparable > 0 ? reversals/comparable : 0;
+
+  // 2) speed jerk: how much speed itself fluctuates frame to frame
+  const avgSpeed = speeds.reduce((a,b)=>a+b,0)/speeds.length;
+  let jerkSum = 0;
+  for(let i=1;i<speeds.length;i++) jerkSum += Math.abs(speeds[i]-speeds[i-1]);
+  const avgJerk = jerkSum/Math.max(speeds.length-1,1);
+  const jerkComponent = Math.min(avgJerk/(avgSpeed+400), 1);
+
+  // 3) raw speed contributes a little on its own (fast = at least a bit tense)
+  const speedComponent = Math.min(avgSpeed/2200, 1);
+
+  let jitter = reversalRate*0.5 + jerkComponent*0.3 + speedComponent*0.2;
+  jitter = Math.min(jitter * 1.1, 1); // small gain so full-on shaking can hit 100%
+
+  const idleFor = now - lastMove;
+  const idleDecay = idleFor > 250 ? Math.min(idleFor/3000, 1) : 0;
+
+  return { speed:avgSpeed, jitter: Math.max(jitter - idleDecay*0.35, 0), idleFor };
+}
+
+// ---------- diagnostic log ----------
+const messages = {
+  calm: [
+    "Vitals nominal.",
+    "Cursor movement smooth and unbothered.",
+    "Patient appears to have their life together.",
+    "No signs of caffeine overconsumption detected.",
+    "This is suspiciously well-adjusted behavior."
+  ],
+  mild: [
+    "Slight cursor hesitation logged.",
+    "Minor directional indecision detected.",
+    "Patient may be overthinking a hyperlink.",
+    "Elevated mouse chattiness observed.",
+    "Recommend a slow blink and a sip of water."
+  ],
+  elevated: [
+    "Cursor jitter trending upward.",
+    "Possible unread Slack message detected nearby.",
+    "Patient's pointer is making decisions faster than their brain.",
+    "Heart rate synthetic estimate: mildly concerning.",
+    "Please stop refreshing the page. We can see you."
+  ],
+  crit: [
+    "CRITICAL: cursor engaged in evasive maneuvers.",
+    "PATIENT MAY BE DEBUGGING IN PRODUCTION.",
+    "ALERT: mouse acceleration exceeds recommended panic threshold.",
+    "This is not a drill. This is definitely a deadline.",
+    "Reading suggests imminent rage-quit."
+  ],
+  max: [
+    "SYSTEM: WE HAVE LOST THE PATIENT.",
+    "ABANDON DESK. ABANDON DESK.",
+    "MONITOR CANNOT CONTINUE. NEITHER CAN YOU, PROBABLY.",
+    "THIS IS FINE. THIS IS FINE. THIS IS FINE.",
+    "EMERGENCY PROTOCOL: CLOSE THE LAPTOP AND GO OUTSIDE."
+  ]
+};
+
+let lastLogTime = 0;
+const logEl = document.getElementById('log');
+
+function tierFor(v){
+  if(v < 20) return 'calm';
+  if(v < 45) return 'mild';
+  if(v < 70) return 'elevated';
+  if(v < 90) return 'crit';
+  return 'max';
+}
+
+function maybeLog(tier){
+  const now = performance.now();
+  const interval = tier === 'max' ? 900 : tier === 'crit' ? 1400 : 2600;
+  if(now - lastLogTime < interval) return;
+  lastLogTime = now;
+  const pool = messages[tier];
+  const msg = pool[Math.floor(Math.random()*pool.length)];
+  const div = document.createElement('div');
+  const cls = tier === 'max' || tier === 'crit' ? 't-crit' : tier === 'elevated' ? 't-warn' : tier === 'calm' ? 't-calm' : '';
+  if(cls) div.className = cls;
+  const ts = new Date().toLocaleTimeString('en-GB');
+  div.textContent = `[${ts}] ${msg}`;
+  logEl.prepend(div);
+  while(logEl.children.length > 40) logEl.removeChild(logEl.lastChild);
+}
+
+// ---------- canvas waveform ----------
+const canvas = document.getElementById('wave');
+const ctx = canvas.getContext('2d');
+let waveHistory = [];
+
+function resizeCanvas(){
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = canvas.clientHeight * devicePixelRatio;
+}
+window.addEventListener('resize', resizeCanvas);
+
+function drawWave(){
+  resizeCanvasIfNeeded();
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+
+  ctx.strokeStyle = 'rgba(94,234,212,0.08)';
+  ctx.lineWidth = 1;
+  for(let i=1;i<4;i++){
+    ctx.beginPath();
+    ctx.moveTo(0, (h/4)*i);
+    ctx.lineTo(w, (h/4)*i);
+    ctx.stroke();
+  }
+
+  waveHistory.push(displayStress);
+  if(waveHistory.length > 260) waveHistory.shift();
+
+  const color = colorForStress(displayStress);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2 * devicePixelRatio;
+  ctx.beginPath();
+  const step = w / 260;
+  waveHistory.forEach((v,i)=>{
+    const jitterAmt = (v/100) * 26 * devicePixelRatio;
+    const noiseVal = (Math.sin(i*0.9 + performance.now()*0.01*(1+v/40)) ) * jitterAmt;
+    const spike = (Math.random()-0.5) * (v/100) * 40 * devicePixelRatio;
+    const y = h/2 - noiseVal - (v>70? spike:0);
+    const x = i*step;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  requestAnimationFrame(drawWave);
+}
+let lastW=0,lastH=0;
+function resizeCanvasIfNeeded(){
+  if(canvas.clientWidth !== lastW || canvas.clientHeight !== lastH){
+    resizeCanvas();
+    lastW = canvas.clientWidth; lastH = canvas.clientHeight;
+  }
+}
+
+function colorForStress(v){
+  if(v < 20) return '#5EEAD4';
+  if(v < 45) return '#8FE0C4';
+  if(v < 70) return '#F59E0B';
+  if(v < 90) return '#F04E56';
+  return '#E11D48';
+}
+
+// ---------- main loop ----------
+const stressValueEl = document.getElementById('stressValue');
+const velValEl = document.getElementById('velVal');
+const jitterValEl = document.getElementById('jitterVal');
+const statusTag = document.getElementById('statusTag');
+const screenEl = document.getElementById('screen');
+const flashEl = document.getElementById('flash');
+const sessionTimeEl = document.getElementById('sessionTime');
+const startTime = performance.now();
+
+function updateStatusTag(tier){
+  const map = {
+    calm: ['NOMINAL', '#5EEAD4'],
+    mild: ['ELEVATED', '#8FE0C4'],
+    elevated: ['WARNING', '#F59E0B'],
+    crit: ['CRITICAL', '#F04E56'],
+    max: ['MELTDOWN', '#E11D48']
+  };
+  const [label, color] = map[tier];
+  statusTag.textContent = label;
+  statusTag.style.color = color;
+  statusTag.style.borderColor = color;
+}
+
+function mainLoop(){
+  const { speed, jitter } = computeMetrics();
+  const targetStress = Math.max(0, Math.min(100, jitter*100));
+
+  // smooth toward target; slow decay when calm, quick rise when spiking
+  const rate = targetStress > stressLevel ? 0.28 : 0.05;
+  stressLevel += (targetStress - stressLevel) * rate;
+  displayStress += (stressLevel - displayStress) * 0.25;
+
+  const tier = tierFor(stressLevel);
+  updateStatusTag(tier);
+  maybeLog(tier);
+
+  stressValueEl.innerHTML = Math.round(displayStress) + '<span>%</span>';
+  stressValueEl.style.color = colorForStress(displayStress);
+  velValEl.textContent = Math.round(speed);
+  jitterValEl.textContent = jitter.toFixed(2);
+
+  screenEl.style.backgroundColor = tier === 'max' ? '#1a0508' : tier === 'crit' ? '#150910' : 'var(--bg)';
+  screenEl.classList.toggle('shaking', tier === 'max');
+
+  if(tier === 'max' && Math.random() < 0.15){
+    flashEl.style.transition = 'opacity 0.05s';
+    flashEl.style.opacity = 0.35;
+    setTimeout(()=>{ flashEl.style.opacity = 0; }, 80);
+  }
+
+  stressAudioTick();
+
+  const elapsed = Math.floor((performance.now()-startTime)/1000);
+  const mm = String(Math.floor(elapsed/60)).padStart(2,'0');
+  const ss = String(elapsed%60).padStart(2,'0');
+  sessionTimeEl.textContent = `${mm}:${ss}`;
+
+  requestAnimationFrame(mainLoop);
+}
+
+// ---------- start ----------
+document.getElementById('startBtn').addEventListener('click', async ()=>{
+  await Tone.start();
+  setupAudio();
+  audioReady = true;
+  document.getElementById('overlay').style.display = 'none';
+  resizeCanvas();
+  lastW = canvas.clientWidth; lastH = canvas.clientHeight;
+  requestAnimationFrame(drawWave);
+  requestAnimationFrame(mainLoop);
+});
+</script>
+</body>
+</html>
