@@ -76,7 +76,8 @@ screenshot1 - <img width="1917" height="1026" alt="Screenshot 2026-09-04 063750"
 
 *The M.A.M. startup screen displaying the fictional medical monitoring interface.*
 
-![Screenshot2]<img width="1917" height="1026" alt="Screenshot 2026-09-04 063750" src="https://github.com/user-attachments/assets/823e77ca-da15-4ae6-84bf-469a5a02bdef" />
+![Screenshot2]<img width="1917" height="1028" alt="Screenshot 2026-09-04 063837" src="https://github.com/user-attachments/assets/a89dd912-2724-49ec-9354-757dda3757ef" />
+
 
 
 *The monitoring dashboard showing stress index, cursor velocity, jitter index, and patient status.*
