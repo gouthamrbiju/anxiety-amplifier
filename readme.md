@@ -1,4 +1,4 @@
-# M.A.M. — Mouse Anxiety Monitor 🖱️💀
+# M.A.M. — Mouse Anxiety Monitor
 
 ## Basic Details
 
